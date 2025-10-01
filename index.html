@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Generar Imágenes con Imagen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono&family=Permanent+Marker&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai@^1.4.0",
+          "react/": "https://aistudiocdn.com/react@^19.1.1/",
+          "react": "https://aistudiocdn.com/react@^19.1.1",
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+          "framer-motion": "https://aistudiocdn.com/framer-motion@^11.3.12"
+        }
+      }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-[#1E1F20] font-['Inter'] text-gray-300 antialiased">
+    <div
+      class="min-h-screen flex items-center justify-center p-4"
+      role="main"
+    >
+      <div
+        class="bg-[#2a2b2e] px-8 pt-8 pb-6 rounded-2xl shadow-2xl w-full max-w-4xl space-y-6"
+      >
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-white tracking-tight">
+            Generador de Imágenes con IA
+          </h1>
+          <p class="text-gray-400 mt-2 text-sm">
+            Usa el poder de la IA para generar o combinar imágenes a partir de un
+            texto.
+          </p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-700">
+          <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+            <button
+              id="tab-generate"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-blue-400 border-blue-400"
+              aria-current="page"
+            >
+              Generar Imagen
+            </button>
+            <button
+              id="tab-combine"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 border-transparent hover:text-gray-300 hover:border-gray-500"
+            >
+              Combinar Imágenes
+            </button>
+          </nav>
+        </div>
+
+        <!-- Generate Panel -->
+        <div id="panel-generate" class="space-y-4">
+          <textarea
+            id="prompt-input-generate"
+            rows="3"
+            class="w-full bg-[#353739] border border-gray-600 rounded-lg p-4 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 resize-none"
+            placeholder="Ej: 'Un plano cinemático de una ciudad futurista de noche'"
+            aria-label="Prompt para generación de imagen"
+          ></textarea>
+        </div>
+
+        <!-- Combine Panel -->
+        <div id="panel-combine" class="hidden space-y-4">
+          <div
+            id="image-uploads-container"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <div class="image-upload-area">
+              <input type="file" accept="image/*" class="hidden" />
+              <div class="placeholder">
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-500"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
+                <p>Subir Imagen 1</p>
+              </div>
+              <img
+                src=""
+                alt="Previsualización 1"
+                class="preview hidden w-full h-full object-cover rounded-lg"
+              />
+            </div>
+            <div class="image-upload-area">
+              <input type="file" accept="image/*" class="hidden" />
+              <div class="placeholder">
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-500"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </svg>
+                <p>Subir Imagen 2</p>
+              </div>
+              <img
+                src=""
+                alt="Previsualización 2"
+                class="preview hidden w-full h-full object-cover rounded-lg"
+              />
+            </div>
+          </div>
+          <button
+            id="add-image-button"
+            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white disabled:opacity-50"
+          >
+            Añadir otra imagen
+          </button>
+          <textarea
+            id="prompt-input-combine"
+            rows="3"
+            class="w-full bg-[#353739] border border-gray-600 rounded-lg p-4 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow duration-200 resize-none"
+            placeholder="Describe cómo combinar o editar las imágenes..."
+            aria-label="Prompt para combinar imágenes"
+          ></textarea>
+        </div>
+
+        <button
+          id="generate-button"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          Generar
+        </button>
+
+        <div class="w-full space-y-4">
+          <img
+            id="output-image"
+            alt="Imagen generada"
+            class="w-full rounded-lg hidden"
+          />
+          <button
+            id="download-button"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none hidden"
+          >
+            Descargar Imagen
+          </button>
+        </div>
+
+        <p id="status" class="text-center text-gray-400 min-h-[24px]"></p>
+      </div>
+    </div>
+    <script type="module" src="index.tsx"></script>
+
+    <div id="banner-root"></div>
+    <script type="text/babel" data-type="module">
+      import React, { useState, useEffect } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import { motion, AnimatePresence } from 'framer-motion';
+
+      const REMIX_IDEAS = [
+        "para generar un póster de película.",
+        "para visualizar un producto.",
+        "para reimaginar diseños de personajes.",
+        "para crear nuevas escenas.",
+        "para previsualizar diferentes tomas.",
+      ];
+
+      const CloseIcon = () => (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      );
+
+      const Banner = () => {
+          const [isVisible, setIsVisible] = useState(true);
+          const [index, setIndex] = useState(0);
+
+          useEffect(() => {
+              const intervalId = setInterval(() => {
+                  setIndex(prevIndex => (prevIndex + 1) % REMIX_IDEAS.length);
+              }, 3500);
+
+              return () => clearInterval(intervalId);
+          }, []);
+
+          const handleSelectKeyClick = async (e) => {
+            e.preventDefault();
+            if (window.aistudio?.openSelectKey) {
+              await window.aistudio.openSelectKey();
+            } else {
+              console.log('window.aistudio.openSelectKey() not available.');
+              alert('La selección de clave de API no está disponible en este entorno.');
+            }
+          };
+          
+          if (!isVisible) {
+            return null;
+          }
+
+          return (
+              <header className="app-banner">
+                  <div className="app-banner-content">
+                      <div className="banner-left">
+                          <p>Potenciado por la API de Gemini</p>
+                      </div>
+                      <div className="remix-ideas">
+                          <span className="remix-prompt">Remezcla esta app...</span>
+                          <div className="remix-text-container">
+                              <AnimatePresence mode="wait">
+                                  <motion.span
+                                      key={index}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      exit={{ opacity: 0, y: -10 }}
+                                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                                      className="remix-text"
+                                  >
+                                      {REMIX_IDEAS[index]}
+                                  </motion.span>
+                              </AnimatePresence>
+                          </div>
+                      </div>
+                      <div className="banner-right">
+                          <div className="banner-buttons">
+                              <a
+                                  href="https://aistudio.google.com/apps"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="banner-button button-gemini-chat"
+                              >
+                                  Apps en AI Studio
+                              </a>
+                              <a
+                                  href="#"
+                                  onClick={handleSelectKeyClick}
+                                  className="banner-button button-ai-studio"
+                              >
+                                  Añade tu clave de API
+                              </a>
+                          </div>
+                          <button
+                            className="close-button"
+                            onClick={() => setIsVisible(false)}
+                            aria-label="Cerrar aviso">
+                            <CloseIcon />
+                          </button>
+                      </div>
+                  </div>
+              </header>
+          );
+      };
+
+      const container = document.getElementById('banner-root');
+      if (container) {
+        const root = createRoot(container);
+        root.render(<React.StrictMode><Banner /></React.StrictMode>);
+      }
+    </script>
+  </body>
+</html>
